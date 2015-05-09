@@ -271,10 +271,10 @@ while (my $line = IRCRead($read_timeout)) {
 	if ($tok[3] =~ /^rau: /) {
 		say "yes";
 		my @cmdtok = split /  */, $tok[3];
+		my $an = AdjNoun($iadjfile, $inounfile);
 		if ($cmdtok[1] eq 'help' or $cmdtok[1] eq 'info') {
-			IRCPrint("PRIVMSG $chan :$nick: RTFS $repourl");
+			IRCPrint("PRIVMSG $chan :$nick: RTFS, you $an: $repourl");
 		} elsif ($cmdtok[1] eq 'paste' or $cmdtok[1] eq 'geif') {
-			my $an = AdjNoun($iadjfile, $inounfile);
 			IRCPrint("PRIVMSG $chan :$nick: $lastfull, you $an.");
 		}
 
