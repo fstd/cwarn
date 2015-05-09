@@ -11,9 +11,9 @@ Quick setup:
 Master:
 0. Have curl, perl, ncat (from nmap) installed
 1. Put cwarn.sh and shboil.inc.sh somewhere in $PATH
-2. Adjust top variables in rau.pl (to be de-hardcoded later)
+2. Adjust top variables in cwarn.pl (to be de-hardcoded later)
 3. Add slaves (host <space> port) lines to the slaves file (a variable in step 2)
-4. Run rau.pl
+4. Run cwarn.pl
 
 
 Slaves:
