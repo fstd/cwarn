@@ -1,0 +1,26 @@
+# cwarn
+complain about bad C test cases
+
+This is work in progress.
+
+NOTE: cwarn_slave.sh instances should run in a sandbox.
+NOTE: a firewall MUST restrict who may talk to cwarn_slave.sh (ONLY the host where cwarn.sh/cwarn.pl run should be able to)
+
+Quick setup:
+------------
+Master:
+0. Have curl, perl, ncat (from nmap) installed
+1. Put cwarn.sh and shboil.inc.sh somewhere in $PATH
+2. Adjust top variables in rau.pl (to be de-hardcoded later)
+3. Add slaves (host <space> port) lines to the slaves file (a variable in step 2)
+4. Run rau.pl
+
+
+Slaves:
+1. Put shboil.inc.sh into $PATH
+2. Run cwarn_slave.sh -c 'comp1:flags1,comp2:flags2,...' listenIP listenPort
+(e.g. cwarn_slave.sh -c 'gcc:-std=c99 -Wno-unused-parameter -Wno-unused-variable -Wall -Wextra,clang:-std=c99 -fno-caret-diagnostics -Wno-unused-parameter -Wno-unused-variable -Wall -Wextra' 0.0.0.0 12345)
+
+
+NOTE: cwarn_slave.sh instances should run in a sandbox.
+NOTE: a firewall MUST restrict who may talk to cwarn_slave.sh (ONLY the host where cwarn.sh/cwarn.pl run should be able to)
