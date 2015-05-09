@@ -1,3 +1,6 @@
+# 2014, Timo Buhrmester
+# occasionally useful shell script boilerplate
+
 if [ "$1" = "-x" ]; then shift; set -x; fi
 argv=; while [ $# -gt 0 ]; do argv="${argv}'$1' "; shift; done
 eval "set -- $argv"
