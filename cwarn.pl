@@ -266,23 +266,20 @@ while (my $line = IRCRead($read_timeout)) {
 		next;
 	}
 
-	say "3: '$tok[3]'";
+	my $chan = lc($tok[2]);
 
 	if ($tok[3] =~ /^rau: /) {
 		say "yes";
 		my @cmdtok = split /  */, $tok[3];
 		if ($cmdtok[1] eq 'help' or $cmdtok[1] eq 'info') {
-			IRCPrint("PRIVMSG #fstd :$nick: RTFS $repourl");
+			IRCPrint("PRIVMSG $chan :$nick: RTFS $repourl");
 		} elsif ($cmdtok[1] eq 'paste' or $cmdtok[1] eq 'geif') {
 			my $an = AdjNoun($iadjfile, $inounfile);
-			IRCPrint("PRIVMSG #fstd :$nick: $lastfull, you $an.");
+			IRCPrint("PRIVMSG $chan :$nick: $lastfull, you $an.");
 		}
 
 		next;
 	}
-
-	my $chan = lc($tok[2]);
-
 
 	my $pasteurl = GetPasteURL $tok[3];
 
@@ -291,21 +288,21 @@ while (my $line = IRCRead($read_timeout)) {
 	say "what about '$pasteurl'?";
 	my @out = `cwarn.sh -vvv -s "$slaves" "$pasteurl"`;
 	if (${^CHILD_ERROR_NATIVE} != 0) {
-		IRCPrint("PRIVMSG #fstd :\x01ACTION twitches involuntarily.\x01");
+		IRCPrint("PRIVMSG $chan :\x01ACTION twitches involuntarily.\x01");
 		say 'cwarn failed -- next!';
 		next;
 	}
 	print STDERR Dumper(\@out);
 
 	if (@out == 1) {
-		IRCPrint("PRIVMSG #fstd :\x01ACTION beams.\x01");
+		#IRCPrint("PRIVMSG $chan :\x01ACTION beams.\x01");
 		say "nothing to complain about - next!";
 		$lastfull=$out[0];
 		next;
 	}
 
 	if (@out != 2) {
-		IRCPrint("PRIVMSG #fstd :\x01ACTION drools.\x01");
+		IRCPrint("PRIVMSG $chan :\x01ACTION drools.\x01");
 		say "huh? - next";
 		next;
 	}
@@ -314,5 +311,5 @@ while (my $line = IRCRead($read_timeout)) {
 	$lastfull=$out[1];
 
 	my $an = AdjNoun($iadjfile, $inounfile);
-	IRCPrint("PRIVMSG #fstd :$nick: Please address the the following problems, you $an: $out[0]");
+	IRCPrint("PRIVMSG $chan :$nick: Please address the the following problems, you $an: $out[0]");
 }
