@@ -134,7 +134,7 @@ Main()
 	printf 'Info: %s\n' "$(head -n1 $cand)" >>in_garbage.c.lnum
 	one="$(cat r_output in_garbage.c.lnum | curl -s -F 'sprunge=<-' http://sprunge.us)"
 
-	printf '%s\n%s\n' "$one" "$all"
+	printf '%s\n%s\n%s\n' "$(head -n1 $cand | cut -d ' ' -f 1)" "$one" "$all"
 	rm -f "$jobs"
 
 	return 0

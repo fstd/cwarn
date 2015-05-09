@@ -294,22 +294,26 @@ while (my $line = IRCRead($read_timeout)) {
 	}
 	print STDERR Dumper(\@out);
 
-	if (@out == 1) {
+	if (@out == 2) {
 		#IRCPrint("PRIVMSG $chan :\x01ACTION beams.\x01");
 		say "nothing to complain about - next!";
 		$lastfull=$out[0];
 		next;
 	}
 
-	if (@out != 2) {
+	if (@out != 3) {
 		IRCPrint("PRIVMSG $chan :\x01ACTION drools.\x01");
 		say "huh? - next";
 		next;
 	}
 
-	chop $out[0]; chop $out[1];
-	$lastfull=$out[1];
+	chop $out[1]; chop $out[2];
+	$lastfull=$out[2];
 
-	my $an = AdjNoun($iadjfile, $inounfile);
-	IRCPrint("PRIVMSG $chan :$nick: Please address the the following problems, you $an: $out[0]");
+	my $add = '';
+	if ($out[0] eq 'NOCOMPILE') {
+		my $an = AdjNoun($iadjfile, $inounfile);
+		$add = ", you $an";
+	}
+	IRCPrint("PRIVMSG $chan :$nick: Please address the following problems$add: $out[1]");
 }
