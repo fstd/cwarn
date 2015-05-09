@@ -12,10 +12,11 @@ Main()
 {
 	rm -f in_garbage.c
 	wget -nv -O in_garbage.c "$url"
-	printf '\n' >>in_garbage.c #swallowed at least on codepad
 	if ! [ -f in_garbage.c -a -s in_garbage.c ]; then
 		E "this failed or gave something empty"
 	fi
+
+	printf '\n' >>in_garbage.c #swallowed at least on codepad
 
 	if file in_garbage.c | grep 'HTML\|XML' >/dev/null; then
 		E "this is HTML or XML"
