@@ -15,6 +15,8 @@ use Data::Dumper;
 # mappings from commonly pasted pastebins to their respective raw URL
 # the double quotes are required because we /ee the substitution
 my %bins = (
+	'(https?:\/\/privatepaste\.com)\/([a-zA-Z0-9]+)'
+	    => '"$1/download/$2"',
 	'(https?:\/\/ideone\.com)\/([a-zA-Z0-9]+)'
 	    => '"$1/plain/$2"',
 	'(https?:\/\/pastebin\.com)\/([a-zA-Z0-9]+)'
