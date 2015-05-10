@@ -76,7 +76,7 @@ Main()
 			cut -d ' ' -f 1 $jobs | xargs kill -TERM 2>/dev/null
 			break
 		fi
-	
+
 		notfin=
 		for pid in $(cut -d ' ' -f 1 $jobs); do
 			if kill -s 0 $pid 2>/dev/null; then
@@ -84,7 +84,7 @@ Main()
 				break;
 			fi
 		done
-	
+
 		if [ -z "$notfin" ]; then
 			break;
 		fi

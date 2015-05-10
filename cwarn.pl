@@ -133,10 +133,10 @@ IRCConnect
 	foreach my $ai (@res) {
 		my $cand = IO::Socket->new();
 		$cand->socket($ai->{family}, $ai->{socktype}, $ai->{protocol})
-			or next;
+		    or next;
 
 		$cand->connect($ai->{addr})
-			or next;
+		    or next;
 
 		$sck = $cand;
 		$sck->timeout(2);
@@ -172,12 +172,12 @@ IRCConnect
 sub
 IRCRead
 {
-    $sel->add($sck);
-    if (!!$sel->can_read($_[0])) {
-	return <$sck>;
-    }
+	$sel->add($sck);
+	if (!!$sel->can_read($_[0])) {
+		return <$sck>;
+	}
 
-    return "T"; #meh.
+	return "T"; #meh.
 }
 
 sub
@@ -243,7 +243,7 @@ AdjNoun
 	@array = <FILE>;
 	close FILE;
 	my $noun = $array[rand @array] =~ s/\x0D?\x0A$//r;
-	
+
 	return "$adj $noun";
 }
 
@@ -266,7 +266,7 @@ GetPasteURL
 	if ($msg =~ /http/) {
 		say "possibly unhandled pastebin in msg '$msg'";
 	}
-	
+
 	return '';
 }
 
@@ -351,7 +351,7 @@ while (my $line = IRCRead($read_timeout)) {
 				IRCPrint("PRIVMSG $chan :\x01ACTION mocks $nick for using a substandard paste site.\x01");
 				$mocked = 1;
 				$nextmock = time + $mockint; #don't mock too often...
-				last;
+				    last;
 			}
 		}
 
