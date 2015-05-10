@@ -49,9 +49,9 @@ BuildWith()
 	tmp_err_c=$(mktemp /tmp/${prgnam}_out.XXXXXXXXX)
 	tmp_err_l=$(mktemp /tmp/${prgnam}_out.XXXXXXXXX)
 
-	$cc $sw -c "$src" >/dev/null 2>$tmp_err_c
+	$cc $sw -c "$src" >/dev/null 2>$tmp_err_c </dev/null
 	compiled=$?
-	$cc $sw -o /dev/null "$src" >/dev/null 2>$tmp_err_l
+	$cc $sw -o /dev/null "$src" >/dev/null 2>$tmp_err_l </dev/null
 	linked=$?
 
 	# XXX not sure if this order is ideal
