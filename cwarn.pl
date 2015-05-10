@@ -58,7 +58,7 @@ my %bins = (
 	'(https?:\/\/pastebin\.geany\.org)\/([a-zA-Z0-9]+)\/'
 	    => '"$1/$2/raw/"',
 	'(https?:\/\/paste\.kde\.org)\/([a-zA-Z0-9]+)'
-	    => '"$1/$2/uddsfq/raw"',
+	    => '"$1/$2/uddsfq/raw"', #instead of 'uddsfq', any token seems to work (but not none!)
 	'(https?:\/\/paste\.eientei\.org)\/show\/([a-zA-Z0-9]+)\/'
 	    => '"$1/raw/$2/"',
 	'(https?:\/\/www\.heypasteit\.com)\/clip\/([a-zA-Z0-9]+)'
