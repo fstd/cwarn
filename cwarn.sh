@@ -39,7 +39,7 @@ Main()
 		printf '%s %s\n' "$!" "$res" >>$jobs
 	done
 
-	timeout=$(($(date +%s)+30))
+	timeout=$(($(date +%s)+10))
 
 	# no wait(1) here because we don't want to potentially wait forever
 	while true; do
@@ -114,19 +114,19 @@ Main()
 	fi
 
 	if [ $nocomp -gt 0 ]; then
-		cand=$(ls -S $(grep -l '^NOCOMPILE' r_*.res) | head -n1)
+		cand="$(GetBiggest NOCOMPILE)"
 	elif [ $warnc -gt 0 ]; then
-		cand=$(ls -S $(grep -l '^WARNEDC' r_*.res) | head -n1)
+		cand="$(GetBiggest WARNEDC)"
 	elif [ $nolink -gt 0 ]; then
-		cand=$(ls -S $(grep -l '^NOLINK' r_*.res) | head -n1)
+		cand="$(GetBiggest NOLINK)"
 	elif [ $warnl -gt 0 ]; then
-		cand=$(ls -S $(grep -l '^WARNEDL' r_*.res) | head -n1)
+		cand="$(GetBiggest WARNEDL)"
 	else
 		rm -f "$jobs"
 		E "huh? $okay $nocomp $warnc $nolink $warnl $total"
 	fi
 
-	sed 1d $cand >r_output
+	sed 1d "$cand" >r_output
 	if ! [ -s r_output ] ; then
 		rm -f "$jobs"
 		E "output empty?"
@@ -139,6 +139,24 @@ Main()
 	rm -f "$jobs"
 
 	return 0
+}
+
+GetBiggest()
+{
+	type="$1"
+	set -x
+	max=0
+	cand=
+	for f in $(grep -l "^$type" r_*.res); do
+		nl=$(wc -l <$f)
+		if [ $nl -gt $max ]; then
+			max=$nl
+			cand="$f"
+		fi
+	done
+set +x
+
+	printf '%s\n' "$cand"
 }
 
 prgauthor='Timo Buhrmester'

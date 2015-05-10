@@ -31,6 +31,8 @@ my %bins = (
 	    => '"$1\/download\/$2"',
 	'(https?:\/\/paste\.fedoraproject\.org)\/([a-zA-Z0-9]+)\/([a-zA-Z0-9]+)\/?'
 	    => '"$1\/$2\/$3\/raw\/"',
+	'(https?:\/\/sprunge\.us\/[a-zA-Z0-9]+)'
+	    => '"$1"'
 );
 
 my $slaves = '/home/fstd/prj/cwarn/slaves';
@@ -217,7 +219,7 @@ GetPasteURL
 $sck = IRCConnect($srv, $port, $pass, $mynick, $myuname, $myfname);
 
 IRCPrint("NAMES #fstd"); #work around what appears to be a freenode glitch...
-my $jointime = time;
+my $jointime = time + 5;
 
 my @joinarr;
 foreach my $chan (keys %chans) {
