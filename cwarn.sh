@@ -26,9 +26,38 @@ Main()
 		E "this isn't text"
 	fi
 
-	D "seems legit on a first glance. dispatching to build slaves"
+
+	if ! grep -F '}' in_garbage.c >/dev/null; then
+		E "no brace, no C"
+	elif ! grep -F '{' in_garbage.c >/dev/null; then
+		E "no brace, no C"
+	elif ! grep -F '(' in_garbage.c >/dev/null; then
+		E "no parens, no C"
+	elif ! grep -F ')' in_garbage.c >/dev/null; then
+		E "no parens, no C"
+	elif ! grep -F ';' in_garbage.c >/dev/null; then
+		E "no semicolon, no C"
+	fi
 
 	jobs=$(mktemp /tmp/${prgnam}.XXXXXXXXX)
+
+	# trim off potential trailing garbage
+	lastbraceln=$(grep -Fn '}' in_garbage.c | tail -n1 | cut -d : -f 1)
+	sed "${lastbraceln}q" in_garbage.c >$jobs #abuse the jobs tempfile temporarily
+	cat <$jobs >in_garbage.c
+
+	# if we can, trim potential leading garbage as well
+	inclno=$(grep -n "^[ $TAB]*#[ $TAB]*include" in_garbage.c | head -n1 | cut -d : -f 1)
+	if [ -n "$inclno" ]; then
+		if [ "$inclno" -gt 1 ]; then
+			sed "1,$((inclno-1))d" in_garbage.c >$jobs #abuse the jobs tempfile temporarily
+			cat <$jobs >in_garbage.c
+		fi
+	fi
+
+	>$jobs
+
+	D "seems legit on a first glance. dispatching to build slaves"
 
 	for f in $(grep -v '^#' $slaves | grep -v "^[ $TAB]*\$" | sed 's/  */:/'); do
 		host="$(echo "$f" | cut -d : -f 1)"
