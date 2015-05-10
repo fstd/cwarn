@@ -131,14 +131,14 @@ Main()
 
 	if [ $okay -eq $total ]; then
 		D "all good!"
-		printf '%s\n' "$all"
+		printf 'OKAY\n%s\n' "$all"
 		exit 0 #everything great
 	fi
 
 	#don't be overly pedantic, some "testcases" lack a main
 	if [ $((nocomp+warnc)) -eq 0 ]; then
 		D "all semi-good!"
-		printf '%s\n' "$all"
+		printf 'OKAY\n%s\n' "$all"
 		exit 0 #meh
 	fi
 
