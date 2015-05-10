@@ -19,6 +19,8 @@ my %bins = (
 	    => '"$1/download/$2"',
 	'(https?:\/\/ideone\.com)\/([a-zA-Z0-9]+)'
 	    => '"$1/plain/$2"',
+	'(https?:\/\/www.ideone\.com)\/([a-zA-Z0-9]+)'
+	    => '"$1/plain/$2"',
 	'(https?:\/\/pastebin\.com)\/([a-zA-Z0-9]+)'
 	    => '"$1\/raw.php?i=$2"',
 	'(https?:\/\/codepad\.org)\/([a-zA-Z0-9]+)'
@@ -34,7 +36,39 @@ my %bins = (
 	'(https?:\/\/paste\.fedoraproject\.org)\/([a-zA-Z0-9]+)\/([a-zA-Z0-9]+)\/?'
 	    => '"$1\/$2\/$3\/raw\/"',
 	'(https?:\/\/sprunge\.us\/[a-zA-Z0-9]+)'
-	    => '"$1"'
+	    => '"$1"',
+	'(https?:\/\/hastebin\.com)\/([a-zA-Z0-9]+).hs'
+	    => '"$1\/raw\/$2"',
+	'(https?:\/\/lpaste\.net)\/8708203895249174528'
+	    => '"$1\/raw\/132324"',
+	'(https?:\/\/fpaste\.org)\/([a-zA-Z0-9]+)\/([a-zA-Z0-9]+)\/'
+	    => '"$1\/$2\/$3\/raw\/"',
+	'(https?:\/\/ghostbin\.com)\/paste\/([a-zA-Z0-9]+)'
+	    => '"$1\/paste\/$2\/raw"',
+	'(https?:\/\/dpaste\.de)\/([a-zA-Z0-9]+)'
+	    => '"$1\/$2\/raw"',
+	'(https?:\/\/codeviewer\.org)\/view\/([a-zA-Z0-9:]+)'
+	    => '"$1\/download\/$2"',
+	'(https?:\/\/paste\.ee)\/p\/([a-zA-Z0-9]+)'
+	    => '"$1\/r\/$2"',
+	'(https?:\/\/paste\.linuxassist\.net)\/view\/([a-zA-Z0-9]+)'
+	    => '"$1\/view\/raw\/$2"',
+	'(https?:\/\/paste\.pound-python\.org)\/show\/([a-zA-Z0-9]+)\/'
+	    => '"$1\/raw\/$2\/"',
+	'(https?:\/\/pastebin\.geany\.org)\/([a-zA-Z0-9]+)\/'
+	    => '"$1\/$2\/raw\/"',
+	'(https?:\/\/paste\.kde\.org)\/([a-zA-Z0-9]+)'
+	    => '"$1\/$2\/uddsfq\/raw"',
+	'(https?:\/\/paste\.eientei\.org)\/show\/([a-zA-Z0-9]+)\/'
+	    => '"$1\/raw\/$2\/"',
+	'(https?:\/\/www\.heypasteit\.com)\/clip\/([a-zA-Z0-9]+)'
+	    => '"$1\/download\/$2"',
+	'(https?:\/\/pastebin\.mozilla\.org)\/([a-zA-Z0-9]+)'
+	    => '"$1\/?dl=$2"',
+	'(https?:\/\/paste\.ubuntu\.org\.cn)\/([a-zA-Z0-9]+)'
+	    => '"$1\/d$2"',
+	'(https?:\/\/paste\.lugons\.org)\/show\/([a-zA-Z0-9]+)\/'
+	    => '"$1\/raw\/$2\/"'
 );
 
 my $slaves = '/home/fstd/prj/cwarn/slaves';
