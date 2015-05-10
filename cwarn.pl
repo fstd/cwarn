@@ -82,6 +82,7 @@ my @crapbins = (
 	'https?:\/\/paste\.jhvisser\.com\/',
 	'https?:\/\/paste\.awesom\.eu\/',
 	'https?:\/\/pastebin\.ubuntu\.com\/',
+	'https?:\/\/paste\.ubuntu\.com\/',
 	'https?:\/\/pastebin\.fr\/',
 	'https?:\/\/paste\.ofcode\.org\/'
 );
