@@ -22,53 +22,53 @@ my %bins = (
 	'(https?:\/\/www.ideone\.com)\/([a-zA-Z0-9]+)'
 	    => '"$1/plain/$2"',
 	'(https?:\/\/pastebin\.com)\/([a-zA-Z0-9]+)'
-	    => '"$1\/raw.php?i=$2"',
+	    => '"$1/raw.php?i=$2"',
 	'(https?:\/\/codepad\.org)\/([a-zA-Z0-9]+)'
-	    => '"$1\/$2\/raw.c"',
+	    => '"$1/$2/raw.c"',
 	'(https?:\/\/bpaste\.net)\/show\/([a-zA-Z0-9]+)'
-	    => '"$1\/raw\/$2"',
+	    => '"$1/raw/$2"',
 	'(https?:\/\/dpaste\.com)\/([a-zA-Z0-9]+)'
-	    => '"$1\/$2.txt"',
+	    => '"$1/$2.txt"',
 	'(https?:\/\/pastie\.org)\/([a-zA-Z0-9]+)'
-	    => '"$1\/pastes\/$2\/download"',
+	    => '"$1/pastes/$2/download"',
 	'(https?:\/\/paste\.debian\.net)\/([a-zA-Z0-9]+)\/?'
-	    => '"$1\/download\/$2"',
+	    => '"$1/download/$2"',
 	'(https?:\/\/paste\.fedoraproject\.org)\/([a-zA-Z0-9]+)\/([a-zA-Z0-9]+)\/?'
-	    => '"$1\/$2\/$3\/raw\/"',
+	    => '"$1/$2/$3/raw/"',
 	'(https?:\/\/sprunge\.us\/[a-zA-Z0-9]+)'
 	    => '"$1"',
 	'(https?:\/\/hastebin\.com)\/([a-zA-Z0-9]+).hs'
-	    => '"$1\/raw\/$2"',
-	'(https?:\/\/lpaste\.net)\/8708203895249174528'
-	    => '"$1\/raw\/132324"',
+	    => '"$1/raw/$2"',
+	'(https?:\/\/lpaste\.net)\/([a-zA-Z0-9]+)'
+	    => '"$1/raw/$1"',
 	'(https?:\/\/fpaste\.org)\/([a-zA-Z0-9]+)\/([a-zA-Z0-9]+)\/'
-	    => '"$1\/$2\/$3\/raw\/"',
+	    => '"$1/$2/$3/raw/"',
 	'(https?:\/\/ghostbin\.com)\/paste\/([a-zA-Z0-9]+)'
-	    => '"$1\/paste\/$2\/raw"',
+	    => '"$1/paste/$2/raw"',
 	'(https?:\/\/dpaste\.de)\/([a-zA-Z0-9]+)'
-	    => '"$1\/$2\/raw"',
+	    => '"$1/$2/raw"',
 	'(https?:\/\/codeviewer\.org)\/view\/([a-zA-Z0-9:]+)'
-	    => '"$1\/download\/$2"',
+	    => '"$1/download/$2"',
 	'(https?:\/\/paste\.ee)\/p\/([a-zA-Z0-9]+)'
-	    => '"$1\/r\/$2"',
+	    => '"$1/r/$2"',
 	'(https?:\/\/paste\.linuxassist\.net)\/view\/([a-zA-Z0-9]+)'
-	    => '"$1\/view\/raw\/$2"',
+	    => '"$1/view/raw/$2"',
 	'(https?:\/\/paste\.pound-python\.org)\/show\/([a-zA-Z0-9]+)\/'
-	    => '"$1\/raw\/$2\/"',
+	    => '"$1/raw/$2/"',
 	'(https?:\/\/pastebin\.geany\.org)\/([a-zA-Z0-9]+)\/'
-	    => '"$1\/$2\/raw\/"',
+	    => '"$1/$2/raw/"',
 	'(https?:\/\/paste\.kde\.org)\/([a-zA-Z0-9]+)'
-	    => '"$1\/$2\/uddsfq\/raw"',
+	    => '"$1/$2/uddsfq/raw"',
 	'(https?:\/\/paste\.eientei\.org)\/show\/([a-zA-Z0-9]+)\/'
-	    => '"$1\/raw\/$2\/"',
+	    => '"$1/raw/$2/"',
 	'(https?:\/\/www\.heypasteit\.com)\/clip\/([a-zA-Z0-9]+)'
-	    => '"$1\/download\/$2"',
+	    => '"$1/download/$2"',
 	'(https?:\/\/pastebin\.mozilla\.org)\/([a-zA-Z0-9]+)'
-	    => '"$1\/?dl=$2"',
+	    => '"$1/?dl=$2"',
 	'(https?:\/\/paste\.ubuntu\.org\.cn)\/([a-zA-Z0-9]+)'
-	    => '"$1\/d$2"',
+	    => '"$1/d$2"',
 	'(https?:\/\/paste\.lugons\.org)\/show\/([a-zA-Z0-9]+)\/'
-	    => '"$1\/raw\/$2\/"'
+	    => '"$1/raw/$2/"'
 );
 
 my $slaves = '/home/fstd/prj/cwarn/slaves';
