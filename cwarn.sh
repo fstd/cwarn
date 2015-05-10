@@ -46,8 +46,8 @@ Main()
 	sed "${lastbraceln}q" in_garbage.c >$jobs #abuse the jobs tempfile temporarily
 	cat <$jobs >in_garbage.c
 
-	# if we can, trim potential leading garbage as well
-	inclno=$(grep -n "^[ $TAB]*#[ $TAB]*include" in_garbage.c | head -n1 | cut -d : -f 1)
+	# if we can, trim potential leading garbage as well, this is even dumber a heuristic
+	inclno=$(grep -n "^[ $TAB]*#" in_garbage.c | head -n1 | cut -d : -f 1)
 	if [ -n "$inclno" ]; then
 		if [ "$inclno" -gt 1 ]; then
 			sed "1,$((inclno-1))d" in_garbage.c >$jobs #abuse the jobs tempfile temporarily
