@@ -71,6 +71,22 @@ my %bins = (
 	    => '"$1/raw/$2/"'
 );
 
+# these would require scraping; most don't offer
+# a mechanism for raw download at all
+my @crapbins = (
+	'https?:\/\/www\.pasteall\.org\/',
+	'https?:\/\/paste2\.org\/',
+	'https?:\/\/codepaste\.net\/',
+	'https?:\/\/vpaste\.net\/',
+	'https?:\/\/pastee\.org\/',
+	'https?:\/\/paste\.jhvisser\.com\/',
+	'https?:\/\/paste\.awesom\.eu\/',
+	'https?:\/\/pastebin\.ubuntu\.com\/',
+	'https?:\/\/pastebin\.fr\/',
+	'https?:\/\/paste\.ofcode\.org\/'
+);
+
+
 my $slaves = '/home/fstd/prj/cwarn/slaves';
 
 my $iadjfile = "insadj"; #path to file with one adjective per line
@@ -88,6 +104,8 @@ my $joinchunk = 40;
 my $joininterval = 1;
 my $hbinterval = 60;
 my $nexthb = time + 10;
+my $nextmock = 0;
+my $mockint = 300;
 
 my $repourl = "http://github.com/fstd/cwarn";
 
@@ -322,6 +340,23 @@ while (my $line = IRCRead($read_timeout)) {
 			IRCPrint("PRIVMSG $chan :$nick: $lastfull, you $an.");
 		} else {
 			IRCPrint("PRIVMSG $chan :No.");
+		}
+	}
+
+	if (time > $nextmock) {
+		my $mocked = 0;
+		foreach my $rxp (@crapbins) {
+			if ($tok[3] =~ /$rxp/) {
+				IRCPrint("PRIVMSG $chan :\x01ACTION mocks $nick for using a substandard paste site.\x01");
+				$mocked = 1;
+				$nextmock = time + $mockint; #don't mock too often...
+				break;
+			}
+		}
+
+		if ($mocked == 1) {
+			say "mocked -- next!";
+			next;
 		}
 	}
 
