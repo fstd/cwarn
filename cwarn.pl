@@ -350,7 +350,7 @@ while (my $line = IRCRead($read_timeout)) {
 				IRCPrint("PRIVMSG $chan :\x01ACTION mocks $nick for using a substandard paste site.\x01");
 				$mocked = 1;
 				$nextmock = time + $mockint; #don't mock too often...
-				break;
+				last;
 			}
 		}
 
