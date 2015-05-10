@@ -303,11 +303,12 @@ while (my $line = IRCRead($read_timeout)) {
 		next;
 	}
 	print STDERR Dumper(\@out);
+	chop foreach (@out);
 
 	if (@out == 2) {
 		#IRCPrint("PRIVMSG $chan :\x01ACTION beams.\x01");
 		say "nothing to complain about - next!";
-		$lastfull=$out[0];
+		$lastfull=$out[1];
 		next;
 	}
 
@@ -317,7 +318,6 @@ while (my $line = IRCRead($read_timeout)) {
 		next;
 	}
 
-	chop $out[1]; chop $out[2];
 	$lastfull=$out[2];
 
 	my $add = '';
