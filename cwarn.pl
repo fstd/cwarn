@@ -273,7 +273,6 @@ while (my $line = IRCRead($read_timeout)) {
 	my $chan = lc($tok[2]);
 
 	if ($tok[3] =~ /^rau: /) {
-		say "yes";
 		my @cmdtok = split /  */, $tok[3];
 		my $an = AdjNoun($iadjfile, $inounfile);
 		if ($cmdtok[1] eq 'help' or $cmdtok[1] eq 'info') {
@@ -283,6 +282,13 @@ while (my $line = IRCRead($read_timeout)) {
 		}
 
 		next;
+	} elsif ($tok[3] =~ /^rau\?/) {
+		if ($lastfull) {
+			my $an = AdjNoun($iadjfile, $inounfile);
+			IRCPrint("PRIVMSG $chan :$nick: $lastfull, you $an.");
+		} else {
+			IRCPrint("PRIVMSG $chan :No.");
+		}
 	}
 
 	my $pasteurl = GetPasteURL $tok[3];
