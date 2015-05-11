@@ -1,7 +1,7 @@
 #!/bin/sh
 
 optvars="
-	'cmpl:c:@comma separated list of colon separated compiler,switches pairs'
+	'cmpl:c:@comma separated list of colon separated std:compiler:switches pairs'
 "
 
 argvars="
@@ -21,13 +21,14 @@ Main()
 			E "failed to mkfifo '$tmp_fifo'";
 		fi
 
+		export std=
 		cat "$tmp_fifo" | ncat -l $host $port | while read -r cmd rest; do
 			case $cmd in
-			BEGIN) >$tmp_accum ; ;;
+			BEGIN) >$tmp_accum ; std="$rest" ;;
 			DATA) printf '%s\n' "$rest" >>$tmp_accum ;; #data line
 			END) D "$(date): received a chunk"
 				cat "$tmp_accum" >garbage.c
-				Build garbage.c >"$tmp_fifo" ;;
+				Build garbage.c "$std" >"$tmp_fifo" ;;
 			*) W "dunno wat do with '$tmp' '$rest'" ;;
 			esac
 		done
@@ -84,6 +85,7 @@ BuildWith()
 Build()
 {
 	src="$1"
+	std="$2"
 
 	oldifs="$IFS"
 	IFS=,
@@ -91,8 +93,14 @@ Build()
 	IFS="$oldifs"
 
 	while [ $# -gt 0 ]; do
-		cc="$(echo "$1" | cut -d ':' -f 1)"
-		sw="$(echo "$1" | sed 's/^[^:]*://')"
+		st="$(echo "$1" | cut -d ':' -f 1)"
+		if ! [ "$st" = "$std" ]; then
+			shift
+			continue
+		fi
+
+		cc="$(echo "$1" | cut -d ':' -f 2)"
+		sw="$(echo "$1" | sed 's/^[^:]*:[^:]*://')"
 		shift
 		BuildWith "$src" "$cc" "$sw"
 	done

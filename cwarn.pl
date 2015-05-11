@@ -366,34 +366,46 @@ while (my $line = IRCRead($read_timeout)) {
 	next if ($pasteurl eq '');
 
 	say "what about '$pasteurl'?";
-	my @out = `cwarn.sh -vvv -s "$slaves" "$pasteurl"`;
+	my @out = `cid.sh -vvv "$pasteurl" "in_garbage.c"`;
+
+	chop $out[0];
+	my @toks = split ' ', $out[0];
+
+	if ($toks[0] eq 'BAD') {
+		say "bad ($toks[1]) -- next!";
+		next;
+	}
+
+	my $silent = ($toks[1] eq 'NOMAIN');
+
+	@out = `cwarn.sh -vvv -c "$toks[0]" -s "$slaves" "in_garbage.c"`;
 	if (${^CHILD_ERROR_NATIVE} != 0) {
 		IRCPrint("PRIVMSG $chan :\x01ACTION twitches involuntarily.\x01");
 		say 'cwarn failed -- next!';
 		next;
 	}
-	print STDERR Dumper(\@out);
 	chop foreach (@out);
+	print STDERR Dumper(\@out);
 
-	if (@out == 2) {
-		#IRCPrint("PRIVMSG $chan :\x01ACTION beams.\x01");
-		say "nothing to complain about - next!";
-		$lastfull=$out[1];
-		next;
-	}
-
-	if (@out != 3) {
-		IRCPrint("PRIVMSG $chan :\x01ACTION drools.\x01");
-		say "huh? - next";
-		next;
-	}
-
-	$lastfull=$out[2];
-
-	my $add = '';
-	if ($out[0] eq 'NOCOMPILE') {
-		my $an = AdjNoun($iadjfile, $inounfile);
-		$add = ", you $an";
-	}
-	IRCPrint("PRIVMSG $chan :$nick: Please address the following problems$add: $out[1]");
+#	if (@out == 2) {
+#		#IRCPrint("PRIVMSG $chan :\x01ACTION beams.\x01");
+#		say "nothing to complain about - next!";
+#		$lastfull=$out[1];
+#		next;
+#	}
+#	
+#	if (@out != 3) {
+#		IRCPrint("PRIVMSG $chan :\x01ACTION drools.\x01");
+#		say "huh? - next";
+#		next;
+#	}
+#	
+#	$lastfull=$out[2];
+#	
+#	my $add = '';
+#	if ($out[0] eq 'NOCOMPILE') {
+#		my $an = AdjNoun($iadjfile, $inounfile);
+#		$add = ", you $an";
+#	}
+#	IRCPrint("PRIVMSG $chan :$nick: Please address the following problems$add: $out[1]");
 }

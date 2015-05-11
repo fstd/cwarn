@@ -26,19 +26,19 @@ Main()
 	fi
 
 	if ! grep -F '}' "$out" >/dev/null; then
-		echo "BAD NOTC"
+		echo "BAD NOTC}"
 		exit 0
 	elif ! grep -F '{' "$out" >/dev/null; then
-		echo "BAD NOTC"
+		echo "BAD NOTC{"
 		exit 0
 	elif ! grep -F '(' "$out" >/dev/null; then
-		echo "BAD NOTC"
+		echo "BAD NOTC("
 		exit 0
 	elif ! grep -F ')' "$out" >/dev/null; then
-		echo "BAD NOTC"
+		echo "BAD NOTC)"
 		exit 0
 	elif ! grep -F ';' "$out" >/dev/null; then
-		echo "BAD NOTC"
+		echo "BAD NOTC;"
 		exit 0
 	fi
 
