@@ -49,12 +49,16 @@ Main()
 	sed "${lastbraceln}q" "$out" >$jobs #abuse the jobs tempfile temporarily
 	cat <$jobs >"$out"
 
-	# if we can, trim potential leading garbage as well, this is even dumber a heuristic
-	inclno=$(grep -n "^[ $TAB]*#" "$out" | head -n1 | cut -d : -f 1)
-	if [ -n "$inclno" ]; then
-		if [ "$inclno" -gt 1 ]; then
-			sed "1,$((inclno-1))d" "$out" >$jobs #abuse the jobs tempfile temporarily
-			cat <$jobs >"$out"
+	# if we can, trim potential leading garbage as well under the assumption that if
+	# there's an #include, then everything before the first ^(LWS)# will be leading
+	# garbage.  this breaks cases where people have code before their #includes...
+	if grep -q "^[ $TAB]*#[ $TAB]*include" "$out"; then
+		inclno=$(grep -n "^[ $TAB]*#" "$out" | head -n1 | cut -d : -f 1)
+		if [ -n "$inclno" ]; then
+			if [ "$inclno" -gt 1 ]; then
+				sed "1,$((inclno-1))d" "$out" >$jobs #abuse the jobs tempfile temporarily
+				cat <$jobs >"$out"
+			fi
 		fi
 	fi
 
