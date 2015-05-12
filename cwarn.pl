@@ -81,10 +81,17 @@ my @crapbins = (
 	'https?:\/\/pastee\.org\/',
 	'https?:\/\/paste\.jhvisser\.com\/',
 	'https?:\/\/paste\.awesom\.eu\/',
-	'https?:\/\/pastebin\.ubuntu\.com\/',
-	'https?:\/\/paste\.ubuntu\.com\/',
 	'https?:\/\/pastebin\.fr\/',
 	'https?:\/\/paste\.ofcode\.org\/'
+);
+
+# these are equally shitty, but commonly used enough
+# to justify scraping them. later, the FQDN is extracted
+# (hence the capture group) and a script called
+# scrape_FQDN.sh is attempted to run
+my @scrapebins = (
+	'https?:\/\/(pastebin\.ubuntu\.com)\/[a-zA-Z0-9]+',
+	'https?:\/\/(paste\.ubuntu\.com)\/[a-zA-Z0-9]+'
 );
 
 
@@ -106,11 +113,13 @@ my $joininterval = 1;
 my $hbinterval = 60;
 my $nexthb = time + 10;
 my $nextmock = 0;
-my $mockint = 300;
+my $mockint = 3600;
 
 my $repourl = "http://github.com/fstd/cwarn";
 
 my $lastfull = '';
+my $lastnick = '';
+my $lastsubstandard = '';
 
 #my %chans = ('##c' => 1, '#fstd' => 1);
 my %chans = ('#fstd' => 1);
@@ -263,11 +272,32 @@ GetPasteURL
 		}
 	}
 
+	foreach my $rxp (@scrapebins) {
+		$msg =~ /($rxp)/;
+		next unless $1;
+		my $capture = $1;
+		if ($capture ne '' and $2 ne '') {
+			my $fqdn = $2;
+			my @out = `scrape_$fqdn.sh "$capture" >scraped.c`;
+			next if (${^CHILD_ERROR_NATIVE} != 0);
+			return "file://scraped.c";
+		}
+	}
+
 	if ($msg =~ /http/) {
 		say "possibly unhandled pastebin in msg '$msg'";
 	}
 
 	return '';
+}
+
+sub
+Mock
+{
+	if (time > $nextmock) {
+		IRCPrint("PRIVMSG $_[0] :\x01ACTION mocks $_[1] for using a substandard paste site.\x01");
+		$nextmock = time + $mockint; #don't mock too often...
+	}
 }
 
 
@@ -330,42 +360,41 @@ while (my $line = IRCRead($read_timeout)) {
 		my $an = AdjNoun($iadjfile, $inounfile);
 		if ($cmdtok[1] eq 'help' or $cmdtok[1] eq 'info') {
 			IRCPrint("PRIVMSG $chan :$nick: RTFS, you $an: $repourl");
-		} elsif ($cmdtok[1] eq 'paste' or $cmdtok[1] eq 'geif') {
-			IRCPrint("PRIVMSG $chan :$nick: $lastfull, you $an.");
 		}
 
 		next;
 	} elsif ($tok[3] =~ /^rau\?/) {
 		if ($lastfull) {
-			my $an = AdjNoun($iadjfile, $inounfile);
-			IRCPrint("PRIVMSG $chan :$nick: $lastfull, you $an.");
+			my $add = $lastsubstandard ? ' substandard' : '';
+			IRCPrint("PRIVMSG $chan :Possible problems with $lastnick"
+				."'s$add paste: $lastfull");
 		} else {
-			IRCPrint("PRIVMSG $chan :No.");
+			my $an = AdjNoun($iadjfile, $inounfile);
+			IRCPrint("PRIVMSG $chan :No, you $an.");
 		}
 	}
 
-	if (time > $nextmock) {
-		my $mocked = 0;
-		foreach my $rxp (@crapbins) {
-			if ($tok[3] =~ /$rxp/) {
-				IRCPrint("PRIVMSG $chan :\x01ACTION mocks $nick for using a substandard paste site.\x01");
-				$mocked = 1;
-				$nextmock = time + $mockint; #don't mock too often...
-				    last;
-			}
+	my $mocked = 0;
+	foreach my $rxp (@crapbins) {
+		if ($tok[3] =~ /$rxp/) {
+			Mock $chan, $nick;
+			$mocked = 1;
+			last;
 		}
+	}
 
-		if ($mocked == 1) {
-			say "mocked -- next!";
-			next;
-		}
+	if ($mocked == 1) {
+		say "mocked -- next!";
+		next;
 	}
 
 	my $pasteurl = GetPasteURL $tok[3];
-
 	next if ($pasteurl eq '');
 
-	say "what about '$pasteurl'?";
+	my $substandard = ($pasteurl =~ /^file:/);
+	my $garbage = 0;
+
+	say "what about '$pasteurl' ($substandard)?";
 	my @out = `cid.sh -vvv "$pasteurl" "in_garbage.c"`;
 
 	chop $out[0];
@@ -374,38 +403,165 @@ while (my $line = IRCRead($read_timeout)) {
 	if ($toks[0] eq 'BAD') {
 		say "bad ($toks[1]) -- next!";
 		next;
+	} elsif ($toks[0] eq 'GARBAGE') {
+		# we treat garbage as c99, basically just so we can still
+		# manually query the results, in case it was actually
+		# supposed to be C
+		say 'cid.sh found this to be GARBAGE';
+		$garbage = 1;
+		$toks[0] = 'c99';
+	} elsif ($toks[0] eq 'DUNNO') {
+		say 'cid.sh failed to identify this; assuming c99';
+		$toks[0] = 'c99';
 	}
 
-	my $silent = ($toks[1] eq 'NOMAIN');
+	my $nocomplain = ($garbage or $toks[1] eq 'NOMAIN');
 
 	@out = `cwarn.sh -vvv -c "$toks[0]" -s "$slaves" "in_garbage.c"`;
 	if (${^CHILD_ERROR_NATIVE} != 0) {
-		IRCPrint("PRIVMSG $chan :\x01ACTION twitches involuntarily.\x01");
+		IRCPrint("PRIVMSG $chan :\x01ACTION twitches involuntarily.\x01") unless $nocomplain;
 		say 'cwarn failed -- next!';
 		next;
 	}
-	chop foreach (@out);
-	print STDERR Dumper(\@out);
+	#print STDERR Dumper(\@out);
+	my $aref;
+	my $aind;
+	my $count = 0;
+	my %res = ('OKAY' => [], 'NOCOMPILE' => [], 'WARNEDC' => [], 'NOLINK' => [], 'WARNEDL' => []);
+	my $pone = '';
+	my $pall = '';
+	foreach my $ln (@out) {
+		chop $ln;
+		say "line is '$ln'";
+		if ($ln =~ /^BEGIN/) {
+			$count++;
+			my @arr = split ' ', $ln;
 
-#	if (@out == 2) {
-#		#IRCPrint("PRIVMSG $chan :\x01ACTION beams.\x01");
-#		say "nothing to complain about - next!";
-#		$lastfull=$out[1];
-#		next;
-#	}
-#	
-#	if (@out != 3) {
-#		IRCPrint("PRIVMSG $chan :\x01ACTION drools.\x01");
-#		say "huh? - next";
-#		next;
-#	}
-#	
-#	$lastfull=$out[2];
-#	
-#	my $add = '';
-#	if ($out[0] eq 'NOCOMPILE') {
-#		my $an = AdjNoun($iadjfile, $inounfile);
-#		$add = ", you $an";
-#	}
-#	IRCPrint("PRIVMSG $chan :$nick: Please address the following problems$add: $out[1]");
+			$aref = $res{$arr[1]};
+			$aind = @{ $aref };
+			shift @arr;
+			$pall .= join(' ', @arr);
+			shift @arr;
+			@{ $aref }[$aind] = join ' ', @arr;
+		} elsif ($ln =~ /^END/) {
+			$pall .= "\n\n";
+		} else {
+			@{ $aref }[$aind] .= ($ln =~ s/^DATA /\n/r);
+			$pall .= ($ln =~ s/^DATA /\n/r);
+		}
+	}
+
+	print STDERR Dumper(\%res);
+
+	my $origprog = "\n\n\n------------------------------------------------------------------------\n";
+	$origprog .= "Original program was:\n\n";
+
+	open my $handle, '<', 'in_garbage.c';
+	my @lines = <$handle>;
+
+	my $lc = 0;
+	foreach my $ln (@lines) {
+		$lc++;
+		$origprog .= $lc . "\t" . $ln;
+	}
+
+	close $handle;
+	$origprog .= "\n------------------------------------------------------------------------\n";
+
+	$pall .= $origprog;
+	open $handle, '>', 'paste_garbage.c';
+	print $handle "$pall";
+	close $handle;
+
+
+	@out = `curl -s -F 'sprunge=<-' http://sprunge.us <paste_garbage.c`;
+	$pall = $out[0];
+	chop $pall;
+
+	IRCPrint("PRIVMSG #fstd :$pall"); # XXX temporarily monitoring this
+
+	$lastfull=$pall;
+	$lastnick=$nick;
+	$lastsubstandard = $substandard;
+
+	if ($count == @{ $res{'OKAY'} }) {
+		if (!$nocomplain and !$substandard) {
+			IRCPrint("PRIVMSG $chan :\x01ACTION beams at $nick.\x01");
+		} elsif ($substandard) { 
+			IRCPrint("PRIVMSG $chan :\x01ACTION beams at $nick while cursing their poor choice of paste sites.\x01");
+		}
+		say "nothing to complain about - next!";
+		next;
+	}
+
+	if (@{ $res{'OKAY'} }) {
+		Mock $chan, $nick if $substandard;
+		say "well it built /somewhere/ without issues... - next!";
+		next;
+	}
+
+	if (@{ $res{'NOCOMPILE'} } + @{ $res{'WARNEDC'} } == 0) {
+		#don't be overly pedantic wrt. to link errors
+		Mock $chan, $nick if $substandard;
+		say "this at least compiled everywhere (but failed to link somewhere) -- next";
+		next;
+	}
+
+	my $max = -1;
+	my $maxcand;
+	my $maxtype;
+	my $insult = 0; #insult when it doesn't even compile, don't insult when it only generates warnings
+	foreach my $cand (@{ $res{'NOCOMPILE'} }) {
+		# oh well this is bad.
+		my @tmp = split '\n', $cand;
+		if (@tmp > $max) {
+			$max = @tmp;
+			$maxcand = $cand;
+			$maxtype = 'NOCOMPILE';
+			$insult = 1;
+		}
+		
+	}
+
+	if ($max == -1) {
+		foreach my $cand (@{ $res{'WARNEDC'} }) {
+			# oh well this is bad.
+			my @tmp = split '\n', $cand;
+			if (@tmp > $max) {
+				$max = @tmp;
+				$maxcand = $cand;
+				$maxtype = 'WARNEDC';
+			}
+			
+		}
+	}
+
+	if ($max == -1) {
+		say "wot -- next";
+		next;
+	}
+
+	$pone = $maxtype . ' ' . $maxcand . $origprog;
+	open $handle, '>', 'paste_garbage.c';
+	print $handle "$pone";
+	close $handle;
+
+	@out = `curl -s -F 'sprunge=<-' http://sprunge.us <paste_garbage.c`;
+	$pone = $out[0];
+	chop $pone;
+
+	if (!$nocomplain) {
+		my $add = '';
+		if ($insult) {
+			my $an = AdjNoun($iadjfile, $inounfile);
+			$add = ", you $an";
+		}
+		my $addbin = $substandard ? ' find a non-horrible paste site and then' : '';
+		IRCPrint("PRIVMSG $chan :$nick: Please$addbin address the following problems$add: $pone");
+		IRCPrint("PRIVMSG #fstd :fstd: $pone (full: $pall) [$nick]"); # XXX temporarily monitoring this
+	} elsif ($substandard) {
+		Mock $chan, $nick;
+	} else {
+		say "unfortunately, we're not complaining..."
+	}
 }

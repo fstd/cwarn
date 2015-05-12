@@ -93,15 +93,17 @@ Build()
 	IFS="$oldifs"
 
 	while [ $# -gt 0 ]; do
-		st="$(echo "$1" | cut -d ':' -f 1)"
+		c="$1"
+		shift
+
+		st="$(echo "$c" | cut -d ':' -f 1)"
 		if ! [ "$st" = "$std" ]; then
-			shift
 			continue
 		fi
 
-		cc="$(echo "$1" | cut -d ':' -f 2)"
-		sw="$(echo "$1" | sed 's/^[^:]*:[^:]*://')"
-		shift
+		cc="$(echo "$c" | cut -d ':' -f 2)"
+		sw="$(echo "$c" | sed 's/^[^:]*:[^:]*://')"
+
 		BuildWith "$src" "$cc" "$sw"
 	done
 }

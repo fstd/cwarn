@@ -1,7 +1,14 @@
 # 2014, Timo Buhrmester
 # occasionally useful shell script boilerplate
 
-if [ "$1" = "-x" ]; then shift; set -x; fi
+boil_trace=false
+if [ "$1" = "-X" ]; then
+	shift
+	set -x
+elif [ "$1" = "-x" ]; then
+	shift
+	boil_trace=true
+fi
 argv=; while [ $# -gt 0 ]; do argv="${argv}'$1' "; shift; done
 eval "set -- $argv"
 
@@ -184,5 +191,8 @@ Usage()
 
 eval "set -- $argv"
 Init "$@"
+if $boil_trace; then
+	set -x
+fi
 Main "$@"
 exit $?

@@ -12,7 +12,7 @@ argvars="
 Main()
 {
 	rm -f "$out"
-	wget -nv -O "$out" "$url"
+	curl -s "$url" >"$out" 
 	if ! [ -f "$out" -a -s "$out" ]; then
 		echo "BAD EMPTY"
 		exit 0
@@ -81,14 +81,22 @@ Main()
 GuessStd()
 {
 	err=$(mktemp /tmp/${prgnam}.XXXXXX)
+	errfirst=$(mktemp /tmp/${prgnam}.XXXXXX)
+	gotfirst=false
 	src="$1"
 	ret=DUNNO
 	for e in 'c89 c99 c11' 'gnu89 gnu99 gnu11'; do
 	for f in '-pedantic-errors' '-pedantic' ''; do
 	for g in $e; do
 		D "Trying $cc ($g, $f)"
-		if $cc -std=$g $f -o /dev/null \
-		    -c "$src" >/dev/null 2>$err </dev/null; then
+		$cc -std=$g $f -o /dev/null -c "$src" >/dev/null 2>$err </dev/null
+		ccret=$?
+		if ! $gotfirst; then
+			cat $err >$errfirst
+			gotfirst=true
+		fi
+
+		if [ $ccret -eq 0 ]; then
 			if [ "$g" = "c89" ] && grep -q 'mixed decl' $err; then
 				# hack: mixed decl and code -> c99 even
 				# though gcc accepts it in c89 mode
@@ -101,6 +109,14 @@ GuessStd()
 	done
 	done
 	done
+
+	if [ "$ret" = "DUNNO" ]; then
+		if grep -qF 'stray' $errfirst && grep -q 'missing\|expected' $errfirst && \
+		    [ $(wc -l <"$src") -ge $(printf '%s*0.75\n' $(wc -l <"$src") | bc -l | sed 's/\..*$//') ]; then
+			W "this is probably not C"
+			ret="GARBAGE"
+		fi
+	fi
 
 	echo "$ret" | sed 's/gnu/c/'
 	rm -f "$err"
