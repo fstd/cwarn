@@ -14,8 +14,9 @@ eval "set -- $argv"
 
 verbose=0
 prgnam=$(basename "$0")
-tmp=$(mktemp /tmp/${prgnam}.XXXXXXXXX)
-trap "rm -f '${tmp}'" EXIT
+traplist="$(mktemp /tmp/${prgnam}.XXXXXXXXX)"
+trap 'Cleanup' EXIT
+
 TAB="$(printf "\t")"
 NL='
 '
@@ -188,6 +189,23 @@ Usage()
 	exit 1
 }
 
+# Hand out filenames of new temp files, arrange for them to be removed on exit
+Tempfile()
+{
+	tmp="$(mktemp /tmp/${prgnam}.XXXXXXXXX)"
+	printf '%s\n' "$tmp" >> "$traplist"
+}
+
+Cleanup()
+{
+	# Remove the accumulated tempfiles
+	# only some basic sanity check here because someone with the right
+	# permissions might inject filenames into the traplist
+	cat "$traplist" | grep -F "/tmp/${prgnam}." | while read -r ln; do
+		rm -f "$ln"
+	done
+	rm -f "$traplist";
+}
 
 eval "set -- $argv"
 Init "$@"
