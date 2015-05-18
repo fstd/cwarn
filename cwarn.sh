@@ -15,7 +15,7 @@ Main()
 		E "empty?!"
 	fi
 
-	jobs=$(mktemp /tmp/${prgnam}.XXXXXXXXX)
+	jobs=$(Tempfile)
 
 	for f in $(grep -v '^#' $slaves | grep -v "^[ $TAB]*\$" | sed 's/  */:/'); do
 		host="$(echo "$f" | cut -d : -f 1)"
@@ -125,8 +125,6 @@ Main()
 #	printf '%s\n%s\n%s\n' "$(head -n1 $cand | cut -d ' ' -f 1)" "$one" "$all"
 
 	cut -d ' ' -f 2 $jobs | xargs cat
-
-	rm -f "$jobs"
 
 	return 0
 }

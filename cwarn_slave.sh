@@ -11,15 +11,12 @@ argvars="
 
 Main()
 {
-	tmp_accum=$(mktemp /tmp/${prgnam}_accum.XXXXXXXXX)
+	tmp_accum=$(Tempfile)
 	tmp_fifo="${tmp_accum}.fifo"
 
 	while true; do
 		rm -f "$tmp_fifo"
-		if ! mkfifo "$tmp_fifo"; then
-			rm -f "$tmp_accum"
-			E "failed to mkfifo '$tmp_fifo'";
-		fi
+		mkfifo "$tmp_fifo" || E "failed to mkfifo '$tmp_fifo'"
 
 		export std=
 		cat "$tmp_fifo" | ncat -l $host $port | while read -r cmd rest; do
@@ -36,7 +33,7 @@ Main()
 		sleep 1 #rate limit just in case
 	done
 
-	rm -f "$tmp_accum" "$tmp_fifo"
+	rm -f "$tmp_fifo"
 
 	return 0
 }
@@ -47,8 +44,8 @@ BuildWith()
 	cc="$2"
 	sw="$3"
 
-	tmp_err_c=$(mktemp /tmp/${prgnam}_out.XXXXXXXXX)
-	tmp_err_l=$(mktemp /tmp/${prgnam}_out.XXXXXXXXX)
+	tmp_err_c=$(Tempfile)
+	tmp_err_l=$(Tempfile)
 
 	$cc $sw -c "$src" >/dev/null 2>$tmp_err_c </dev/null
 	compiled=$?
@@ -78,8 +75,6 @@ BuildWith()
 		sed 's/^/DATA /' $tmp_err_l
 	fi
 	printf 'END\n'
-
-	rm -f "$tmp_err_c" "$tmp_err_l"
 }
 
 Build()

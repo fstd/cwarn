@@ -80,8 +80,8 @@ Main()
 
 GuessStd()
 {
-	err=$(mktemp /tmp/${prgnam}.XXXXXX)
-	errfirst=$(mktemp /tmp/${prgnam}.XXXXXX)
+	err=$(Tempfile)
+	errfirst=$(Tempfile)
 	gotfirst=false
 	src="$1"
 	ret=DUNNO
@@ -119,7 +119,6 @@ GuessStd()
 	fi
 
 	echo "$ret" | sed 's/gnu/c/'
-	rm -f "$err"
 }
 
 prgauthor='Timo Buhrmester'
