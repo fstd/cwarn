@@ -1,215 +1,244 @@
 # 2014, Timo Buhrmester
 # occasionally useful shell script boilerplate
 
-boil_trace=false
+_boil_trace=false
 if [ "$1" = "-X" ]; then
 	shift
 	set -x
 elif [ "$1" = "-x" ]; then
 	shift
-	boil_trace=true
+	_boil_trace=true
 fi
-argv=; while [ $# -gt 0 ]; do argv="${argv}'$1' "; shift; done
-eval "set -- $argv"
+_boil_argv=; while [ $# -gt 0 ]; do _boil_argv="${_boil_argv}'$1' "; shift; done
+eval "set -- $_boil_argv"
 
-verbose=0
-prgnam=$(basename "$0")
-traplist="$(mktemp /tmp/${prgnam}.XXXXXXXXX)"
-trap 'Cleanup' EXIT
+_boil_verb=0
+_boil_prgnam=$(basename "$0")
+_boil_traplist="$(mktemp /tmp/${_boil_prgnam}.XXXXXXXXX)"
+_boil_gentraplist="$(mktemp /tmp/${_boil_prgnam}.XXXXXXXXX)"
+trap '_boil_Cleanup' EXIT
 
 TAB="$(printf "\t")"
-NL='
+_boil_NL='
 '
-arg_num_opt=0
-arg_num_mand=0
+_boil_arg_num_opt=0
+_boil_arg_num_mand=0
 
 prgauthor="${prgauthor:-Nobody}"
 prgyear="${prgyear:-Never}"
 prgcontact="${prgcontact:-'Do not call us, we call you'}"
 
-D() { if [ $verbose -gt 0 ]; then echo "$prgnam: $*" >&2; fi; }
-W() { echo "$prgnam: $*" >&2; } 
-E() { echo "$prgnam: ERROR: $*" >&2 ; exit 1; }
+V() { if [ $_boil_verb -gt 1 ]; then printf '%s: %s: %s\n' "$_boil_prgnam" "$(date)" "$*" >&2; fi; }
+D() { if [ $_boil_verb -gt 0 ]; then printf '%s: %s: %s\n' "$_boil_prgnam" "$(date)" "$*" >&2; fi; }
+W() { printf '%s: %s: %s\n' "$_boil_prgnam" "$(date)" "$*" >&2; }
+E() { printf '%s: %s: %s\n' "$_boil_prgnam" "$(date)" "$*" >&2 ; exit 1; }
 
-Init()
+Verbosity()
 {
-	Init_Optvars
-	Init_Argvars
-	while getopts "hv$getopt_optstr" i; do
-		if [ "$i" = "?" ]; then Usage; fi
+	printf '%s\n' $_boil_verb
+}
 
-		optnam=
-		eval "optnam=\"\$optnam_$i\""
-		eval "hasarg=\"\$optarg_$i\""
-		if [ -n "$optnam" ]; then
-			if [ -n "$hasarg" ]; then
-				eval "${optnam}='$OPTARG'"
+_boil_Init()
+{
+	_boil_Init_Optvars
+	_boil_Init_Argvars
+	while getopts "hv$_boil_getopt_optstr" _boil_i; do
+		if [ "$_boil_i" = "?" ]; then _boil_Usage; fi
+
+		_boil_optnam=
+		eval "_boil_optnam=\"\$_boil_optnam_$_boil_i\""
+		eval "_boil_hasarg=\"\$_boil_optarg_$_boil_i\""
+		if [ -n "$_boil_optnam" ]; then
+			if [ -n "$_boil_hasarg" ]; then
+				eval "${_boil_optnam}='$OPTARG'"
 			else
-				eval "${optnam}='$i'"
+				eval "${_boil_optnam}='$_boil_i'"
 			fi
 		else
-			case "$i" in
-			v) verbose=$((verbose+1)) ;;
-			*) Usage ;;
+			case "$_boil_i" in
+			v) _boil_verb=$((_boil_verb+1)) ;;
+			*) _boil_Usage ;;
 			esac
 		fi
 	done
 
 	shift $(expr $OPTIND - 1)
 
-	if [ $# -lt $arg_num_mand ]; then
-		W "too few arguments (need at least $arg_num_mand)" >&2
-		Usage
+	if [ $# -lt $_boil_arg_num_mand ]; then
+		W "too few arguments (need at least $_boil_arg_num_mand)" >&2
+		_boil_Usage
 		exit 1
 	fi
 
-	for f in $(echo "$uah_mand" | tr -d '<>'); do
-		eval "${f}='$1'"
+	for _boil_f in $(printf "%s\n" "$_boil_uah_mand" | tr -d '<>'); do
+		eval "${_boil_f}='$1'"
 		shift
 	done
 
-	for f in $(echo "$uah_opt" | tr -d '[<>]'); do
+	for _boil_f in $(printf "%s\n" "$_boil_uah_opt" | tr -d '[<>]'); do
 		if [ $# -eq 0 ]; then
 			break;
 		fi
 
-		eval "${f}='$1'"
+		eval "${_boil_f}='$1'"
 		shift
 	done
 
-	for f in $optnams; do
-		oldifs="$IFS"
+	for _boil_f in $_boil_optnams; do
+		_boil_oldifs="$IFS"
 		IFS=':'
-		set -- ${f}_
-		IFS="$oldifs"
+		set -- ${_boil_f}_
+		IFS="$_boil_oldifs"
 
-		eval "$f=\"\${$f:-\$DEF_$f}\""
+		eval "$_boil_f=\"\${$_boil_f:-\$_boil_DEF_$_boil_f}\""
 	done
 }
 
 
-Init_Optvars()
+_boil_Init_Optvars()
 {
-	getopt_optstr=''
+	_boil_getopt_optstr=''
 
 	# Iterate over the optvar entries defined at the top
-	eval "set -- $(echo "$optvars" | tr -d '\n')"
+	eval "set -- $(printf "%s\n" "$optvars" | tr -d '\n')"
 	while [ $# -gt 0 ]; do
-		entry="$1"
+		_boil_entry="$1"
 		shift
 
-		usg_descr="${entry#*@}"
-		entry="${entry%%@*}"
+		_boil_usg_descr="${_boil_entry#*@}"
+		_boil_entry="${_boil_entry%%@*}"
 
 		# We need the function call to backup the positional parameters
-		Init_Optvars_Core "$entry" #assigns optnam, go_chr, optval_def, go_hasarg
-		optnams="${optnams}$optnam "
+		_boil_Init_Optvars_Core "$_boil_entry" #assigns _boil_optnam, _boil_go_chr, _boil_optval_def, _boil_go_hasarg
+		_boil_optnams="${_boil_optnams}$_boil_optnam "
 
-		getopt_optstr="${getopt_optstr}${go_chr}${go_hasarg}"
-		eval "optnam_${go_chr%:}='$optnam'"
-		eval "optarg_${go_chr%:}='$go_hasarg'"
-		eval "usage=\"\${usage}    -$(echo "$go_chr$go_hasarg" \
-		    | sed 's/:$/ <arg>/'): $usg_descr$NL\""
+		_boil_getopt_optstr="${_boil_getopt_optstr}${_boil_go_chr}${_boil_go_hasarg}"
+		eval "_boil_optnam_${_boil_go_chr%:}='$_boil_optnam'"
+		eval "_boil_optarg_${_boil_go_chr%:}='$_boil_go_hasarg'"
+		eval "_boil_usage=\"\${_boil_usage}    -$(printf "%s\n" "$_boil_go_chr$_boil_go_hasarg" \
+		    | sed 's/:$/ <arg>/'): $_boil_usg_descr$_boil_NL\""
 
-		eval "unset $optnam; DEF_$optnam='$optval_def' ; $optnam="
+		eval "unset $_boil_optnam; _boil_DEF_$_boil_optnam='$_boil_optval_def' ; $_boil_optnam="
 	done
 }
 
-Init_Optvars_Core()
+_boil_Init_Optvars_Core()
 {
-	oldifs="$IFS"
+	_boil_oldifs="$IFS"
 	IFS=':'
 	set -- ${1}_ #add trailing colon to 'preserve' potential trailing delim
-	IFS="$oldifs"
+	IFS="$_boil_oldifs"
 
-	optnam="$1"
-	go_chr="$2"
-	go_hasarg=
-	optval_def=
+	_boil_optnam="$1"
+	_boil_go_chr="$2"
+	_boil_go_hasarg=
+	_boil_optval_def=
 
 	if [ $# -gt 2 ]; then
-		optval_def="${3%_}"
-		go_hasarg=":"
+		shift; shift
+		while [ $# -gt 0 ]; do 
+			_boil_optval_def="$_boil_optval_def:$1"
+			shift
+		done
+		_boil_optval_def="${_boil_optval_def%_}"
+		_boil_optval_def="${_boil_optval_def#:}"
+		_boil_go_hasarg=":"
 	else
-		go_chr="${go_chr%_}"
+		_boil_go_chr="${_boil_go_chr%_}"
 	fi
 }
 
-Init_Argvars()
+_boil_Init_Argvars()
 {
 	# Iterate over the argvar entries defined at the top
-	eval "set -- $(echo "$argvars" | tr -d '\n')"
+	eval "set -- $(printf "%s\n" "$argvars" | tr -d '\n')"
 	while [ $# -gt 0 ]; do
-		entry="$1"
+		_boil_entry="$1"
 		shift
 
-		usg_descr="${entry#*@}"
-		entry="${entry%%@*}"
+		_boil_usg_descr="${_boil_entry#*@}"
+		_boil_entry="${_boil_entry%%@*}"
 
 		# We need the function call to backup the positional parameters
-		Init_Argvars_Core "$entry" #assigns argnam, argopt
+		_boil_Init_Argvars_Core "$_boil_entry" #assigns _boil_argnam, _boil_argopt
 
-		if [ -n "$argopt" ]; then
-			uah_opt="${uah_opt}[<$argnam>] "
-			arg_num_opt=$((arg_num_opt+1))
+		if [ -n "$_boil_argopt" ]; then
+			_boil_uah_opt="${_boil_uah_opt}[<$_boil_argnam>] "
+			_boil_arg_num_opt=$((_boil_arg_num_opt+1))
 		else
-			uah_mand="${uah_mand}<$argnam> "
-			arg_num_mand=$((arg_num_mand+1))
+			_boil_uah_mand="${_boil_uah_mand}<$_boil_argnam> "
+			_boil_arg_num_mand=$((_boil_arg_num_mand+1))
 		fi
 
-		eval "argusage=\"\${argusage}    $(echo "<$argnam>$argopt" \
-		    | sed 's/:$/ (optional)/'): $usg_descr$NL\""
-		eval "unset $argnam; $argnam="
+		eval "_boil_argusage=\"\${_boil_argusage}    $(printf "%s\n" "<$_boil_argnam>$_boil_argopt" \
+		    | sed 's/:$/ (optional)/'): $_boil_usg_descr$_boil_NL\""
+		eval "unset $_boil_argnam; $_boil_argnam="
 	done
 }
 
-Init_Argvars_Core()
+_boil_Init_Argvars_Core()
 {
-	oldifs="$IFS"
+	_boil_oldifs="$IFS"
 	IFS=':'
 	set -- ${1}_ #add trailing colon to 'preserve' potential trailing delim
-	IFS="$oldifs"
+	IFS="$_boil_oldifs"
 
-	argnam="${1%_}"
+	_boil_argnam="${1%_}"
 	if [ -n "$2" ]; then
-		argopt=:
+		_boil_argopt=:
 	fi
 }
 
-Usage()
+_boil_Usage()
 {
-	echo "Usage: $prgnam [ -${getopt_optstr}vh ] $uah_mand $uah_opt" >&2
-	echo "  Options:" >&2
-	echo -n "$usage" >&2
-	echo "    -v: Be more verbose" >&2
-	echo "    -h: Display this usage statement" >&2
-	echo "  Arguments:" >&2
-	echo -n "$argusage" >&2
-	echo "(C) $prgyear, $prgauthor (contact: $prgcontact)" >&2
+	printf "Usage: %s [ -%svh ] %s %s\n" "$_boil_prgnam" "$_boil_getopt_optstr" "$_boil_uah_mand" "$_boil_uah_opt" >&2
+	printf "  Options:\n" >&2
+	printf "%s" "$_boil_usage" >&2
+	printf "    -v: Be more verbose\n" >&2
+	printf "    -h: Display this usage statement\n" >&2
+	printf "  Arguments:\n" >&2
+	printf "%s" "$_boil_argusage" >&2
+	printf "(C) %s, %s (contact: %s)\n" "$prgyear" "$prgauthor" "$prgcontact" >&2
 	exit 1
 }
 
 # Hand out filenames of new temp files, arrange for them to be removed on exit
-Tempfile()
+TF()
 {
-	tmp="$(mktemp /tmp/${prgnam}.XXXXXXXXX)"
-	printf '%s\n' "$tmp" >> "$traplist"
+	_boil_tmp="$(mktemp /tmp/${_boil_prgnam}.XXXXXXXXX)"
+	#if given an argument (regardless what it is), don't automatically rm on exit
+	if [ $# -eq 0 ]; then
+		printf '%s\n' "$_boil_tmp" | tee -a "$_boil_traplist"
+	else
+		printf '%s\n' "$_boil_tmp"
+	fi
 }
 
-Cleanup()
+AddTrap()
+{
+	printf '%s\n' "$1" >>$_boil_gentraplist
+}
+
+_boil_Cleanup()
 {
 	# Remove the accumulated tempfiles
 	# only some basic sanity check here because someone with the right
 	# permissions might inject filenames into the traplist
-	cat "$traplist" | grep -F "/tmp/${prgnam}." | while read -r ln; do
-		rm -f "$ln"
+	cat "$_boil_traplist" | grep -F "/tmp/${_boil_prgnam}." | while read -r _boil_ln; do
+		rm -f "$_boil_ln"
 	done
-	rm -f "$traplist";
+	rm -f "$_boil_traplist";
+
+	cat "$_boil_gentraplist" | while read -r ln; do
+		D "evaling '$ln'"
+		eval "$ln"
+	done
+	rm -f "$_boil_gentraplist";
 }
 
-eval "set -- $argv"
-Init "$@"
-if $boil_trace; then
+eval "set -- $_boil_argv"
+_boil_Init "$@"
+if $_boil_trace; then
 	set -x
 fi
 Main "$@"

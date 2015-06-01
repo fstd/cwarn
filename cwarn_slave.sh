@@ -11,7 +11,7 @@ argvars="
 
 Main()
 {
-	tmp_accum=$(Tempfile)
+	tmp_accum=$(TF)
 	tmp_fifo="${tmp_accum}.fifo"
 
 	while true; do
@@ -44,8 +44,8 @@ BuildWith()
 	cc="$2"
 	sw="$3"
 
-	tmp_err_c=$(Tempfile)
-	tmp_err_l=$(Tempfile)
+	tmp_err_c=$(TF)
+	tmp_err_l=$(TF)
 
 	$cc $sw -c "$src" >/dev/null 2>$tmp_err_c </dev/null
 	compiled=$?
@@ -65,7 +65,11 @@ BuildWith()
 	fi
 
 	platform=$(uname -sm | sed 's/ /\//g')
-	ccver=$($cc --version | head -n1 | sed 's/ /_/g')
+	ver='--version'
+	if [ "$cc" = 'tendracc' ]; then
+		ver='-V'
+	fi
+	ccver=$($cc $ver 2>&1 | head -n1 | sed 's/ /_/g')
 
 	printf 'BEGIN %s %s %s %s\n' $retstr $platform "$ccver" "$sw"
 	#this sucks, see above too
