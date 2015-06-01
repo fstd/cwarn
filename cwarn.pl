@@ -122,6 +122,9 @@ my $sck;
 my %mocked;
 my $mockint = 5;
 
+#original URLs of seen pastes, in case someone quotes a paste
+my %seen;
+
 my $prgnam = $0 =~ s/^.*\///r;
 
 # indentations shows call hierarchy
@@ -243,6 +246,8 @@ sub do_paste {
 
 	my ($url, $ourl) = get_paste_url $msg;
 	return unless $url;
+	return if exists $seen{$ourl};
+	$seen{$ourl} = 1;
 
 	my $substandard = $url =~ /^file:/;
 
