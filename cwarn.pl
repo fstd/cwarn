@@ -75,6 +75,8 @@ my %bins = (
 	    => '"$1/?dl=$2"',
 	'(https?:\/\/paste\.ubuntu\.org\.cn)\/([a-zA-Z0-9]+)'
 	    => '"$1/d$2"',
+	'(https?:\/\/pastebin\.ca\/([a-zA-Z0-9]+)'
+	    => '"$1/raw/$2"',
 	'(https?:\/\/paste\.lugons\.org)\/show\/([a-zA-Z0-9]+)\/'
 	    => '"$1/raw/$2/"'
 );
@@ -107,8 +109,8 @@ my @scrapebins = (
 );
 
 # these are supposed to eventually be overridable by command line switches
-my $mysrv = "148.251.187.147:6667";
-my $mypass = "supfgt";
+my $mysrv = "irc.freenode.org:6667";
+my $mypass = "secret";
 my $mynick = "rau";
 my $myuname = "rau";
 my $myfname = "rau reloaded";
