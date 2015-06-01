@@ -75,7 +75,7 @@ my %bins = (
 	    => '"$1/?dl=$2"',
 	'(https?:\/\/paste\.ubuntu\.org\.cn)\/([a-zA-Z0-9]+)'
 	    => '"$1/d$2"',
-	'(https?:\/\/pastebin\.ca\/([a-zA-Z0-9]+)'
+	'(https?:\/\/pastebin\.ca)\/([a-zA-Z0-9]+)'
 	    => '"$1/raw/$2"',
 	'(https?:\/\/paste\.lugons\.org)\/show\/([a-zA-Z0-9]+)\/'
 	    => '"$1/raw/$2/"'
