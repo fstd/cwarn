@@ -364,7 +364,7 @@ sub do_raucmd {
 			irc_print("PRIVMSG $chan :Couldn't dig up a paste with the mentioned criteria ($crit)");
 		} else {
 			my $what = exists $pref->{'NOINDENT'} ? 're-pasted (could not indent(1))' : 'sanitized';
-			irc_print("PRIVMSG $chan :$tell: ".see." $pref->{'URL'}?c$add ($what ".whose($pref).attrs($pref)." paste; $ago, orig: <$pref->{'OURL'}>)");
+			irc_print("PRIVMSG $chan :$tell: ".see." $pref->{'URL'}?c$add ($what ".whose($pref).attrs($pref)." code, pasted $ago at <$pref->{'OURL'}>)");
 		}
 		return;
 	}
@@ -374,9 +374,9 @@ sub do_raucmd {
 		if ($notfound) {
 			irc_print("PRIVMSG $chan :Couldn't dig up a paste with the mentioned criteria ($crit)");
 		} elsif (exists $pref->{'NOBUILD'}) {
-			irc_print("PRIVMSG $chan :$nick: Sorry, for some reason, I couldn't build ".whose($pref).attrs($pref)." paste ($ago, orig: <$pref->{'OURL'}>).  fstd?");
+			irc_print("PRIVMSG $chan :$nick: Sorry, for some reason, I couldn't build ".whose($pref).attrs($pref)." code (pasted $ago at <$pref->{'OURL'}>).  fstd?");
 		} else {
-			irc_print("PRIVMSG $chan :$tell: ".see." $pref->{'FULLINFO'}$add (full build info for ".whose($pref).attrs($pref)." paste; $ago, orig: <$pref->{'OURL'}>)");
+			irc_print("PRIVMSG $chan :$tell: ".see." $pref->{'FULLINFO'}$add (full build info for ".whose($pref).attrs($pref)." code, pasted $ago at <$pref->{'OURL'}>)");
 		}
 		return;
 	}
