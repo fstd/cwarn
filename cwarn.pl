@@ -249,7 +249,7 @@ sub do_paste {
 	my ($url, $ourl) = get_paste_url $msg;
 	return unless $url;
 	return if exists $seen{$ourl};
-	$seen{$ourl} = 1;
+	$seen{$ourl} = 1 unless $ourl =~ /ideone\.com/;
 
 	my $substandard = $url =~ /^file:/;
 
