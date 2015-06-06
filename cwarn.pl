@@ -43,6 +43,8 @@ my %bins = (
 	    => '"$1/$2/$3/raw/"',
 	'(https?:\/\/paste\.pr0\.tips\/[a-zA-Z0-9]+)'
 	    => '"$1"',
+	'(https?:\/\/vp\.dav1d\.de\/[a-zA-Z0-9]+)'
+	    => '"$1"',
 	'(https?:\/\/sprunge\.us\/[a-zA-Z0-9]+)'
 	    => '"$1"',
 	'(https?:\/\/hastebin\.com)\/([a-zA-Z0-9]+).hs'
