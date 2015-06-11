@@ -370,7 +370,7 @@ sub do_raucmd {
 			irc_print("PRIVMSG $chan :Couldn't dig up a paste with the mentioned criteria ($crit)");
 		} else {
 			my $what = exists $pref->{'NOINDENT'} ? 're-pasted (could not indent(1))' : 'sanitized';
-			irc_print("PRIVMSG $chan :$tell: ".see." $pref->{'URL'}?c$add ($what ".whose($pref).attrs($pref)." code, pasted $ago at <$pref->{'OURL'}>)");
+			irc_print("PRIVMSG $chan :$tell: ".see.": $pref->{'URL'}?c$add - $what ".whose($pref).attrs($pref)." code, pasted $ago at $pref->{'OURL'}");
 		}
 		return;
 	}
@@ -382,7 +382,7 @@ sub do_raucmd {
 		} elsif (exists $pref->{'NOBUILD'}) {
 			irc_print("PRIVMSG $chan :$nick: Sorry, for some reason, I couldn't build ".whose($pref).attrs($pref)." code (pasted $ago at <$pref->{'OURL'}>).  fstd?");
 		} else {
-			irc_print("PRIVMSG $chan :$tell: ".see." $pref->{'FULLINFO'}$add (full build info for ".whose($pref).attrs($pref)." code, pasted $ago at <$pref->{'OURL'}>)");
+			irc_print("PRIVMSG $chan :$tell: ".see.": $pref->{'FULLINFO'}$add - full build info for ".whose($pref).attrs($pref)." code, pasted $ago at $pref->{'OURL'}");
 		}
 		return;
 	}
@@ -443,7 +443,7 @@ sub parse_msg {
 	$rxp = "(?:(?:, *)|\\b)(?:you|thou|u) +((?:$word(?:, *$word)* )?+$word)";
 	my $insverbs = -1;
 	my $ins = '';
-	if ($msg =~ /$rxp/) {
+	if ($msg =~ /$rxp/i) {
 		$ins = $1;
 		$msg =~ s/$rxp//;
 		my @tmp = split / +/, $ins;
