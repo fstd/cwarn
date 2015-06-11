@@ -51,6 +51,8 @@ my %bins = (
 	    => '"$1/raw/$2"',
 	'(https?:\/\/lpaste\.net)\/([a-zA-Z0-9]+)'
 	    => '"$1/raw/$2"',
+	'(https?:\/\/fpaste\.org)\/([a-zA-Z0-9]+)\/'
+	    => '"$1/$2/raw/"',
 	'(https?:\/\/fpaste\.org)\/([a-zA-Z0-9]+)\/([a-zA-Z0-9]+)\/'
 	    => '"$1/$2/$3/raw/"',
 	'(https?:\/\/ghostbin\.com)\/paste\/([a-zA-Z0-9]+)'
@@ -264,6 +266,8 @@ sub do_paste {
 	}
 
 	my $p = { 'TIME' => time, 'NICK' => $nick, 'CHAN' => $chan, 'URL' => $rpurl, 'OURL' => $ourl, 'MSG' => $msg };
+
+	$p->{'SUBSTANDARD'} = 1 if ($substandard);
 
 	if ($status eq 'noindent') {
 		L "Could not indent(1) that...";
