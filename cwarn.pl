@@ -41,6 +41,8 @@ my %bins = (
 	    => '"$1/download/$2"',
 	'(https?:\/\/paste\.fedoraproject\.org)\/([a-zA-Z0-9]+)\/([a-zA-Z0-9]+)\/?'
 	    => '"$1/$2/$3/raw/"',
+	'(https?:\/\/ptpb\.pw\/[a-zA-Z0-9]+)'
+	    => '"$1"',
 	'(https?:\/\/paste\.pr0\.tips\/[a-zA-Z0-9]+)'
 	    => '"$1"',
 	'(https?:\/\/vp\.dav1d\.de\/[a-zA-Z0-9]+)'
