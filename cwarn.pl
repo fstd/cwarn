@@ -307,8 +307,8 @@ sub do_crapbins {
 sub do_raucmd {
 	my ($nick, $chan, $msg) = @_;
 
-	if ($msg =~ /^rau[:,!?]/) {
-		$msg =~ s/^rau[:,!?] *//;
+	if ($msg =~ /^rau[.:,!?]/) {
+		$msg =~ s/^rau[.:,!?] *//;
 		$msg =~ s/[,.!?] *rau[?!1.]*$//; #trim off if present
 	} elsif ($msg =~ /[,.!?] *rau[?!1.]*$/) {
 		$msg =~ s/[,.!?] *rau[?!1.]*$//;
@@ -367,7 +367,7 @@ sub do_raucmd {
 
 
 	my $rxp = '\b(?:clean|cleanup|sanitize|indent|prett[yi]|(?:re-?paste)|deretard)\b';
-	if ($rest =~ /$rxp/) {
+	if ($rest =~ /$rxp/i) {
 		if ($notfound) {
 			irc_print("PRIVMSG $chan :Couldn't dig up a paste with the mentioned criteria ($crit)");
 		} else {
@@ -377,8 +377,8 @@ sub do_raucmd {
 		return;
 	}
 
-	$rxp = '\b(?:show|info|details|give|gib|let.s see)\b';
-	if ($rest =~ /$rxp/) {
+	$rxp = '\b(?:show|info|details|give|gib|let.s see|do something|do it)\b';
+	if ($rest =~ /$rxp/i) {
 		if ($notfound) {
 			irc_print("PRIVMSG $chan :Couldn't dig up a paste with the mentioned criteria ($crit)");
 		} elsif (exists $pref->{'NOBUILD'}) {
@@ -399,45 +399,45 @@ sub parse_msg {
 	my ($msg) = @_;
 	my $rxp = '\b(?:with|said|wrote) +"([^"]+)"';
 	my $filmsg = '';
-	if ($msg =~ /$rxp/) {
+	if ($msg =~ /$rxp/i) {
 		$filmsg = $1;
-		$msg =~ s/$rxp//;
+		$msg =~ s/$rxp//i;
 	}
 
 	$rxp = '\b((?:[1-9][0-9]*)|fir|seco|thi|late)(?:st|nd|rd|th)( +to last)?';
 	my $n = 0;
-	if ($msg =~ /$rxp/) {
+	if ($msg =~ /$rxp/i) {
 		$n = $1;
-		$n =~ s/fir/1/;
-		$n =~ s/late/1/;
-		$n =~ s/seco/2/;
-		$n =~ s/thi/3/;
+		$n =~ s/fir/1/i;
+		$n =~ s/late/1/i;
+		$n =~ s/seco/2/i;
+		$n =~ s/thi/3/i;
 		$n = $2 ? -$n : $n;
-		$msg =~ s/$rxp//;
+		$msg =~ s/$rxp//i;
 	}
 
 	$rxp = '\b(?:of|from|by) +([][a-zA-Z0-9^_\\|`{}-]+)\b';
 	my $filnick = '';
-	if ($msg =~ /$rxp/) {
+	if ($msg =~ /$rxp/i) {
 		$filnick = $1;
-		$msg =~ s/$rxp//;
+		$msg =~ s/$rxp//i;
 	}
 
 	if (!$filnick) {
 		$rxp = "\\b([][a-zA-Z0-9^_\\\\|`{}-]+)'s? (?:paste|(?:test ?case)|pastie|code)\\b";
-		if ($msg =~ /$rxp/) {
+		if ($msg =~ /$rxp/i) {
 			$filnick = $1;
-			$msg =~ s/$rxp//;
+			$msg =~ s/$rxp//i;
 		}
 	}
 
 	my $tell = '';
 	$rxp = '\btell ((?:the [a-zA-Z-]+)|(?:[][a-zA-Z0-9^_\\|`{}-]+))\b';
-	if ($msg =~ /$rxp/) {
+	if ($msg =~ /$rxp/i) {
 		$tell = $1;
 		$tell = 'offender' if $tell =~ /^the(m| )/;
 		W "msg is '$msg'";
-		$msg =~ s/$rxp//;
+		$msg =~ s/$rxp//i;
 		W "msg now '$msg'";
 	}
 
@@ -447,7 +447,7 @@ sub parse_msg {
 	my $ins = '';
 	if ($msg =~ /$rxp/i) {
 		$ins = $1;
-		$msg =~ s/$rxp//;
+		$msg =~ s/$rxp//i;
 		my @tmp = split / +/, $ins;
 		$insverbs = @tmp - 1;
 	}
